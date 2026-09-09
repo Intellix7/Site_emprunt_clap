@@ -1,6 +1,5 @@
 import { ArrowRight } from 'lucide-react';
 import { Field } from './Field';
-// import { Input } from './Input';
 import { cn } from '@/lib/utils';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -11,8 +10,8 @@ import { dateTheme } from '@/dateTheme';
 import 'dayjs/locale/fr';
 
 /**
- * Two `datetime-local` inputs for a [start, end] window. Values are raw
- * datetime-local strings; convert with `localInputToIso` before sending.
+ * Two `DateTimePicker`s for a [start, end] window. Values are `Dayjs` (or
+ * `null` when unset); call `.toISOString()` before sending.
  *
  * Pass `stack` in narrow containers (e.g. a sidebar column) so the two inputs
  * stack vertically instead of overflowing.
@@ -58,7 +57,7 @@ export function DateRangeField({
               <DateTimePicker
                 value={end}
                 timeSteps={{ minutes: 5 }}
-                minDate={start || undefined}
+                minDateTime={start ?? undefined}
                 onChange={(v) => onEndChange(v)}
                 className="min-w-0"
               />

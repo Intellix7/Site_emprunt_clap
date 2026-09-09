@@ -13,7 +13,8 @@ import { UserCombobox } from '@/features/loans/UserCombobox';
 import { useItems } from '@/hooks/useInventory';
 import { useLoanMutations } from '@/hooks/useLoans';
 import { ApiError } from '@/lib/api';
-import dayjs, { Dayjs } from 'dayjs';
+import { defaultBookingEnd, defaultBookingStart } from '@/lib/dateRange';
+import { Dayjs } from 'dayjs';
 
 export function AdminNewLoanPage() {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ export function AdminNewLoanPage() {
 
   const [borrower, setBorrower] = useState<UserBrief | null>(null);
   const [itemIds, setItemIds] = useState<number[]>([]);
-  const [start, setStart] = useState<Dayjs | null>(dayjs());
-  const [end, setEnd] = useState<Dayjs | null>(dayjs());
+  const [start, setStart] = useState<Dayjs | null>(defaultBookingStart);
+  const [end, setEnd] = useState<Dayjs | null>(defaultBookingEnd);
   const [depositOverride, setDepositOverride] = useState<string | null>(null);
   const [comments, setComments] = useState('');
   const [error, setError] = useState<string | null>(null);

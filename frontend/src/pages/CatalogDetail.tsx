@@ -11,8 +11,9 @@ import { PageSpinner } from '@/components/ui/Spinner';
 import { CatalogThumb } from '@/features/catalog/CatalogCard';
 import { useCart } from '@/features/cart/CartContext';
 import { useCatalog, useCatalogAvailability } from '@/hooks/useInventory';
+import { defaultBookingEnd, defaultBookingStart } from '@/lib/dateRange';
 import { cn } from '@/lib/utils';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 
 export function CatalogDetailPage() {
   const { id } = useParams();
@@ -22,8 +23,8 @@ export function CatalogDetailPage() {
 
   const { data: catalog, isLoading } = useCatalog(catalogId);
 
-  const [start, setStart] = useState<Dayjs | null>(dayjs());
-  const [end, setEnd] = useState<Dayjs | null>(dayjs());
+  const [start, setStart] = useState<Dayjs | null>(defaultBookingStart);
+  const [end, setEnd] = useState<Dayjs | null>(defaultBookingEnd);
   const rangeReady = !!start && !!end && start.isBefore(end);
   const startIso = rangeReady ? start.toISOString() : '';
   const endIso = rangeReady ? end.toISOString() : '';

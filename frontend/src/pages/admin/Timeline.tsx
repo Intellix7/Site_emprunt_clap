@@ -1,5 +1,5 @@
 import { CalendarRange } from 'lucide-react';
-import { useRef, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { LoanTimelineEntry } from '@/client';
 import { PageHeader } from '@/components/PageHeader';
@@ -8,22 +8,12 @@ import { DateRangeField } from '@/components/ui/DateRangeField';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useLoanTimeline } from '@/hooks/useLoans';
+import { type DateRange, defaultTimelineRange } from '@/lib/dateRange';
 import { formatDateShort, formatDayMonth } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 const DAY = 86_400_000;
-
-interface DateRangeState {
-  start: Dayjs | null;
-  end: Dayjs | null;
-}
-
-function defaultRange() {
-  const start = dayjs().startOf('day');
-  const end = start.add(21, 'day');
-  return { start, end };
-}
 
 const statusBar: Record<string, string> = {
   scheduled: 'bg-info/70 border-info',
@@ -33,22 +23,13 @@ const statusBar: Record<string, string> = {
 
 export function AdminTimelinePage() {
   const navigate = useNavigate();
-  const [{ start, end }, setRange] = useState<DateRangeState>(defaultRange);
+  const [{ start, end }, setRange] = useState<DateRange>(defaultTimelineRange);
   const valid = !!start && !!end && start.isBefore(end);
   const startIso = valid ? start.toISOString() : '';
   const endIso = valid ? end.toISOString() : '';
   const { data, isLoading } = useLoanTimeline(startIso, endIso, valid);
 
-  const cachedDataRef = useRef(data);
-
-  if (data) {
-    // eslint-disable-next-line react-hooks/refs
-    cachedDataRef.current = data;
-  }
-
-  // eslint-disable-next-line react-hooks/refs
-  const displayData = data || cachedDataRef.current;
-  // eslint-disable-next-line react-hooks/refs
+  const displayData = valid ? data : undefined;
   const isInitialLoad = isLoading && !displayData;
   const windowStart = start ? start.valueOf() : 0;
   const windowEnd = end ? end.valueOf() : 0;
@@ -97,11 +78,15 @@ export function AdminTimelinePage() {
         </CardBody>
       </Card>
 
-      {/* eslint-disable-next-line react-hooks/refs */}
-      {isInitialLoad ? (
+      {!valid ? (
+        <EmptyState
+          icon={CalendarRange}
+          title="Période invalide"
+          description="Choisissez une date de début antérieure à la date de fin."
+        />
+      ) : isInitialLoad ? (
         <Skeleton className="h-72 rounded-card" />
-      ) : // eslint-disable-next-line react-hooks/refs
-      !displayData || displayData.loans.length === 0 ? (
+      ) : !displayData || displayData.loans.length === 0 ? (
         <EmptyState
           icon={CalendarRange}
           title="Aucun prêt sur cette période"
@@ -109,7 +94,7 @@ export function AdminTimelinePage() {
         />
       ) : (
         <Card>
-          <CardBody className={cn('overflow-x-auto transition-opacity duration-200')}>
+          <CardBody className="overflow-x-auto">
             <div className="min-w-160">
               <div className="relative mb-3 ml-44 h-5 border-b border-border">
                 {dayMarks.map((m, i) => (

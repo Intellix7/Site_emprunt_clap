@@ -573,7 +573,7 @@ function PartialReturnModal({
                       return next;
                     })
                   }
-                  className="size-4 accent-[--color-primary]"
+                  className="size-4 accent-(--color-primary)"
                 />
                 {li.item.name}
               </label>

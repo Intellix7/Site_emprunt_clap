@@ -47,25 +47,6 @@ export function formatMoney(cents: number | null | undefined): string {
   }).format(value);
 }
 
-/**
- * Convert the value of a <input type="datetime-local"> (a wall-clock string
- * with no timezone) into a timezone-aware ISO 8601 string, as required by the
- * API's AwareDatetime fields.
- */
-export function localInputToIso(value: string): string {
-  // `new Date("2025-03-12T14:30")` is parsed as local time; toISOString keeps
-  // the instant and appends the timezone (Z), satisfying AwareDatetime.
-  return new Date(value).toISOString();
-}
-
-/** Convert an ISO string back into a value usable by <input datetime-local>. */
-export function isoToLocalInput(iso: string | null | undefined): string {
-  const date = toDate(iso);
-  if (!date) return '';
-  // Render in local time, trimmed to minutes.
-  return format(date, "yyyy-MM-dd'T'HH:mm");
-}
-
 /** Number of whole days between two dates (inclusive of partial days → ceil). */
 export function daysBetween(start: string | Date, end: string | Date): number {
   const a = toDate(start);

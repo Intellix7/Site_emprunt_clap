@@ -15,8 +15,10 @@ import { CatalogThumb } from '@/features/catalog/CatalogCard';
 import { useCart } from '@/features/cart/CartContext';
 import { useRequestMutations } from '@/hooks/useRequests';
 import { ApiError } from '@/lib/api';
+import { defaultBookingEnd, defaultBookingStart } from '@/lib/dateRange';
+import { daysBetween } from '@/lib/format';
 import { PHONE_HINT, isValidPhone } from '@/lib/validation';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 
 export function RequestBuilderPage() {
   const { user } = useAuth();
@@ -27,8 +29,8 @@ export function RequestBuilderPage() {
 
   const [phone, setPhone] = useState('');
   const [reason, setReason] = useState('');
-  const [start, setStart] = useState<Dayjs | null>(dayjs());
-  const [end, setEnd] = useState<Dayjs | null>(dayjs());
+  const [start, setStart] = useState<Dayjs | null>(defaultBookingStart);
+  const [end, setEnd] = useState<Dayjs | null>(defaultBookingEnd);
   const [error, setError] = useState<string | null>(null);
 
   const datesValid = !!start && !!end && start.isBefore(end);
@@ -132,7 +134,7 @@ export function RequestBuilderPage() {
             />
             {datesValid && (
               <p className="-mt-1 text-xs text-content-faint">
-                Durée : {end.diff(start, 'day')} jour(s)
+                Durée : {daysBetween(start.toDate(), end.toDate())} jour(s)
               </p>
             )}
 
