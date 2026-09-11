@@ -12,7 +12,7 @@ RUN npm run generate:client
 RUN npm run build
 
 
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.14-alpine
 
 WORKDIR /app
 
