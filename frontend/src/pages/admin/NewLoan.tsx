@@ -13,7 +13,8 @@ import { UserCombobox } from '@/features/loans/UserCombobox';
 import { useItems } from '@/hooks/useInventory';
 import { useLoanMutations } from '@/hooks/useLoans';
 import { ApiError } from '@/lib/api';
-import { localInputToIso } from '@/lib/format';
+import { defaultBookingEnd, defaultBookingStart } from '@/lib/dateRange';
+import { Dayjs } from 'dayjs';
 
 export function AdminNewLoanPage() {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ export function AdminNewLoanPage() {
 
   const [borrower, setBorrower] = useState<UserBrief | null>(null);
   const [itemIds, setItemIds] = useState<number[]>([]);
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
+  const [start, setStart] = useState<Dayjs | null>(defaultBookingStart);
+  const [end, setEnd] = useState<Dayjs | null>(defaultBookingEnd);
   const [depositOverride, setDepositOverride] = useState<string | null>(null);
   const [comments, setComments] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,7 @@ export function AdminNewLoanPage() {
   );
   const depositValue = depositOverride ?? (suggestedDeposit / 100).toFixed(2);
 
-  const datesValid = !!start && !!end && new Date(start) < new Date(end);
+  const datesValid = !!start && !!end && start.isBefore(end);
 
   const submit = async () => {
     setError(null);
@@ -51,8 +52,8 @@ export function AdminNewLoanPage() {
     try {
       const res = await create.mutateAsync({
         borrower_id: borrower.id,
-        start_date: localInputToIso(start),
-        end_date: localInputToIso(end),
+        start_date: start.toISOString(),
+        end_date: end.toISOString(),
         item_ids: itemIds,
         total_deposit_cents: Math.round(parseFloat(depositValue || '0') * 100),
         comments: comments.trim() || null,

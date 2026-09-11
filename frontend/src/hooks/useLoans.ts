@@ -56,6 +56,7 @@ export function useLoanTimeline(startIso: string, endIso: string, enabled = true
         }),
       ),
     enabled: enabled && !!startIso && !!endIso,
+    placeholderData: keepPreviousData,
   });
 }
 

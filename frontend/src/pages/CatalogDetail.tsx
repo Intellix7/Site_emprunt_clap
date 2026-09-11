@@ -11,8 +11,9 @@ import { PageSpinner } from '@/components/ui/Spinner';
 import { CatalogThumb } from '@/features/catalog/CatalogCard';
 import { useCart } from '@/features/cart/CartContext';
 import { useCatalog, useCatalogAvailability } from '@/hooks/useInventory';
-import { localInputToIso } from '@/lib/format';
+import { defaultBookingEnd, defaultBookingStart } from '@/lib/dateRange';
 import { cn } from '@/lib/utils';
+import { Dayjs } from 'dayjs';
 
 export function CatalogDetailPage() {
   const { id } = useParams();
@@ -22,11 +23,11 @@ export function CatalogDetailPage() {
 
   const { data: catalog, isLoading } = useCatalog(catalogId);
 
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
-  const rangeReady = !!start && !!end && new Date(start) < new Date(end);
-  const startIso = rangeReady ? localInputToIso(start) : '';
-  const endIso = rangeReady ? localInputToIso(end) : '';
+  const [start, setStart] = useState<Dayjs | null>(defaultBookingStart);
+  const [end, setEnd] = useState<Dayjs | null>(defaultBookingEnd);
+  const rangeReady = !!start && !!end && start.isBefore(end);
+  const startIso = rangeReady ? start.toISOString() : '';
+  const endIso = rangeReady ? end.toISOString() : '';
   const { data: availability, isFetching } = useCatalogAvailability(
     catalogId,
     startIso,
@@ -53,7 +54,7 @@ export function CatalogDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <Card className="overflow-hidden">
-          <div className="aspect-[16/9] w-full">
+          <div className="aspect-video w-full">
             <CatalogThumb imagePath={catalog.image_path} />
           </div>
           {catalog.description && (
