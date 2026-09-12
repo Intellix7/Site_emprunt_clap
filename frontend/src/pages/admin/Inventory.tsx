@@ -70,35 +70,37 @@ function CatalogsTab() {
   const [toDelete, setToDelete] = useState<CatalogPublic | null>(null);
 
   return (
-    <Section
-      onAdd={() => setEditing('new')}
-      addLabel="Nouvelle référence"
-      leading={<ImportExportButtons entity="catalogs" />}
-      empty={!isLoading && (!data || data.length === 0)}
-      loading={isLoading}
-    >
-      <Table>
-        <THead>
-          <Tr>
-            <Th>Nom</Th>
-            <Th>Catégorie</Th>
-            <Th>Description</Th>
-            <Th className="w-px" />
-          </Tr>
-        </THead>
-        <TBody>
-          {data?.map((c) => (
-            <Tr key={c.id}>
-              <Td className="font-medium">{c.name}</Td>
-              <Td className="text-content-muted">{c.category.name}</Td>
-              <Td className="max-w-xs truncate text-content-muted">{c.description ?? '—'}</Td>
-              <Td>
-                <RowActions onEdit={() => setEditing(c)} onDelete={() => setToDelete(c)} />
-              </Td>
+    <>
+      <Section
+        onAdd={() => setEditing('new')}
+        addLabel="Nouvelle référence"
+        leading={<ImportExportButtons entity="catalogs" />}
+        empty={!isLoading && (!data || data.length === 0)}
+        loading={isLoading}
+      >
+        <Table>
+          <THead>
+            <Tr>
+              <Th>Nom</Th>
+              <Th>Catégorie</Th>
+              <Th>Description</Th>
+              <Th className="w-px" />
             </Tr>
-          ))}
-        </TBody>
-      </Table>
+          </THead>
+          <TBody>
+            {data?.map((c) => (
+              <Tr key={c.id}>
+                <Td className="font-medium">{c.name}</Td>
+                <Td className="text-content-muted">{c.category.name}</Td>
+                <Td className="max-w-xs truncate text-content-muted">{c.description ?? '—'}</Td>
+                <Td>
+                  <RowActions onEdit={() => setEditing(c)} onDelete={() => setToDelete(c)} />
+                </Td>
+              </Tr>
+            ))}
+          </TBody>
+        </Table>
+      </Section>
 
       {editing && (
         <CatalogModal
@@ -141,7 +143,7 @@ function CatalogsTab() {
           }
         }}
       />
-    </Section>
+    </>
   );
 }
 
@@ -280,33 +282,35 @@ function CategoriesTab() {
   const [toDelete, setToDelete] = useState<CategoryPublic | null>(null);
 
   return (
-    <Section
-      onAdd={() => setEditing('new')}
-      addLabel="Nouvelle catégorie"
-      leading={<ImportExportButtons entity="categories" />}
-      empty={!isLoading && (!data || data.length === 0)}
-      loading={isLoading}
-    >
-      <Table>
-        <THead>
-          <Tr>
-            <Th>Nom</Th>
-            <Th>Description</Th>
-            <Th className="w-px" />
-          </Tr>
-        </THead>
-        <TBody>
-          {data?.map((c) => (
-            <Tr key={c.id}>
-              <Td className="font-medium">{c.name}</Td>
-              <Td className="max-w-md truncate text-content-muted">{c.description ?? '—'}</Td>
-              <Td>
-                <RowActions onEdit={() => setEditing(c)} onDelete={() => setToDelete(c)} />
-              </Td>
+    <>
+      <Section
+        onAdd={() => setEditing('new')}
+        addLabel="Nouvelle catégorie"
+        leading={<ImportExportButtons entity="categories" />}
+        empty={!isLoading && (!data || data.length === 0)}
+        loading={isLoading}
+      >
+        <Table>
+          <THead>
+            <Tr>
+              <Th>Nom</Th>
+              <Th>Description</Th>
+              <Th className="w-px" />
             </Tr>
-          ))}
-        </TBody>
-      </Table>
+          </THead>
+          <TBody>
+            {data?.map((c) => (
+              <Tr key={c.id}>
+                <Td className="font-medium">{c.name}</Td>
+                <Td className="max-w-md truncate text-content-muted">{c.description ?? '—'}</Td>
+                <Td>
+                  <RowActions onEdit={() => setEditing(c)} onDelete={() => setToDelete(c)} />
+                </Td>
+              </Tr>
+            ))}
+          </TBody>
+        </Table>
+      </Section>
 
       {editing && (
         <CategoryModal
@@ -344,7 +348,7 @@ function CategoriesTab() {
           }
         }}
       />
-    </Section>
+    </>
   );
 }
 
@@ -417,49 +421,51 @@ function ItemsTab() {
   const [history, setHistory] = useState<ItemPublic | null>(null);
 
   return (
-    <Section
-      onAdd={() => setEditing('new')}
-      addLabel="Nouvel article"
-      leading={<ImportExportButtons entity="items" />}
-      empty={!isLoading && (!data || data.length === 0)}
-      loading={isLoading}
-    >
-      <Table>
-        <THead>
-          <Tr>
-            <Th>Article</Th>
-            <Th>Référence</Th>
-            <Th>État</Th>
-            <Th>Statut</Th>
-            <Th>Caution</Th>
-            <Th className="w-px" />
-          </Tr>
-        </THead>
-        <TBody>
-          {data?.map((item) => (
-            <Tr key={item.id}>
-              <Td className="font-medium">{item.name}</Td>
-              <Td className="text-content-muted">{item.catalog.name}</Td>
-              <Td>
-                <ConditionBadge condition={item.condition} />
-              </Td>
-              <Td>
-                <AvailabilityBadge availability={item.availability} />
-              </Td>
-              <Td className="tabular-nums">
-                {item.deposit_cents > 0 ? formatMoney(item.deposit_cents) : '—'}
-              </Td>
-              <Td>
-                <RowActions
-                  onHistory={() => setHistory(item)}
-                  onEdit={() => setEditing(item)}
-                  onDelete={() => setToDelete(item)}
-                />
-              </Td>
+    <>
+      <Section
+        onAdd={() => setEditing('new')}
+        addLabel="Nouvel article"
+        leading={<ImportExportButtons entity="items" />}
+        empty={!isLoading && (!data || data.length === 0)}
+        loading={isLoading}
+      >
+        <Table>
+          <THead>
+            <Tr>
+              <Th>Article</Th>
+              <Th>Référence</Th>
+              <Th>État</Th>
+              <Th>Statut</Th>
+              <Th>Caution</Th>
+              <Th className="w-px" />
             </Tr>
-          ))}
-        </TBody>
-      </Table>
+          </THead>
+          <TBody>
+            {data?.map((item) => (
+              <Tr key={item.id}>
+                <Td className="font-medium">{item.name}</Td>
+                <Td className="text-content-muted">{item.catalog.name}</Td>
+                <Td>
+                  <ConditionBadge condition={item.condition} />
+                </Td>
+                <Td>
+                  <AvailabilityBadge availability={item.availability} />
+                </Td>
+                <Td className="tabular-nums">
+                  {item.deposit_cents > 0 ? formatMoney(item.deposit_cents) : '—'}
+                </Td>
+                <Td>
+                  <RowActions
+                    onHistory={() => setHistory(item)}
+                    onEdit={() => setEditing(item)}
+                    onDelete={() => setToDelete(item)}
+                  />
+                </Td>
+              </Tr>
+            ))}
+          </TBody>
+        </Table>
+      </Section>
 
       {editing && (
         <ItemModal
@@ -500,7 +506,7 @@ function ItemsTab() {
       />
 
       <ItemHistoryModal item={history} onClose={() => setHistory(null)} />
-    </Section>
+    </>
   );
 }
 
