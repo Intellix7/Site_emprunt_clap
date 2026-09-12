@@ -110,15 +110,36 @@ function CatalogsTab() {
           onClose={() => setEditing(null)}
           onSave={async (body, file, removeImage) => {
             let catalogId: number;
-            if (editing === 'new') {
-              catalogId = (await create.mutateAsync(body)).id;
-            } else {
-              // Clearing the image is a patch of image_path → null.
-              const patch = removeImage && !file ? { ...body, image_path: null } : body;
-              await update.mutateAsync({ id: editing.id, body: patch });
-              catalogId = editing.id;
+            try {
+              if (editing === 'new') {
+                catalogId = (await create.mutateAsync(body)).id;
+              } else {
+                // Clearing the image is a patch of image_path → null.
+                const patch = removeImage && !file ? { ...body, image_path: null } : body;
+                await update.mutateAsync({ id: editing.id, body: patch });
+                catalogId = editing.id;
+              }
+            } catch (err) {
+              toast.error(
+                'Enregistrement impossible',
+                err instanceof ApiError ? err.detail : undefined,
+              );
+              return;
             }
-            if (file) await uploadImage.mutateAsync({ id: catalogId, file });
+
+            if (file) {
+              try {
+                await uploadImage.mutateAsync({ id: catalogId, file });
+              } catch (err) {
+                toast.error(
+                  'Référence enregistrée, mais image refusée',
+                  err instanceof ApiError ? err.detail : undefined,
+                );
+                setEditing(null);
+                return;
+              }
+            }
+
             toast.success(editing === 'new' ? 'Référence créée' : 'Référence mise à jour');
             setEditing(null);
           }}
@@ -170,10 +191,11 @@ function CatalogModal({
 }) {
   const [name, setName] = useState(catalog?.name ?? '');
   const [description, setDescription] = useState(catalog?.description ?? '');
-  const [categoryId, setCategoryId] = useState(catalog?.category.id ?? categories[0]?.id ?? 0);
+  const [categoryId, setCategoryId] = useState<number | null>(catalog?.category.id ?? null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(catalog?.image_path ?? null);
   const [removeImage, setRemoveImage] = useState(false);
+  const selectedCategoryId = categoryId ?? categories[0]?.id ?? 0;
 
   const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = e.target.files?.[0] ?? null;
@@ -200,13 +222,13 @@ function CatalogModal({
           </Button>
           <Button
             loading={saving}
-            disabled={!name.trim() || !categoryId}
+            disabled={!name.trim() || !selectedCategoryId}
             onClick={() =>
               onSave(
                 {
                   name: name.trim(),
                   description: description.trim() || null,
-                  category_id: categoryId,
+                  category_id: selectedCategoryId,
                 },
                 file,
                 removeImage,
@@ -255,8 +277,15 @@ function CatalogModal({
         <Field label="Nom" required>
           <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
         </Field>
-        <Field label="Catégorie" required>
-          <Select value={categoryId} onChange={(e) => setCategoryId(Number(e.target.value))}>
+        <Field
+          label="Catégorie"
+          required
+          error={categories.length === 0 ? "Aucune catégorie n'existe encore." : undefined}
+        >
+          <Select
+            value={selectedCategoryId}
+            onChange={(e) => setCategoryId(Number(e.target.value))}
+          >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -318,14 +347,21 @@ function CategoriesTab() {
           saving={create.isPending || update.isPending}
           onClose={() => setEditing(null)}
           onSave={async (body) => {
-            if (editing === 'new') {
-              await create.mutateAsync(body);
-              toast.success('Catégorie créée');
-            } else {
-              await update.mutateAsync({ id: editing.id, body });
-              toast.success('Catégorie mise à jour');
+            try {
+              if (editing === 'new') {
+                await create.mutateAsync(body);
+                toast.success('Catégorie créée');
+              } else {
+                await update.mutateAsync({ id: editing.id, body });
+                toast.success('Catégorie mise à jour');
+              }
+              setEditing(null);
+            } catch (err) {
+              toast.error(
+                'Enregistrement impossible',
+                err instanceof ApiError ? err.detail : undefined,
+              );
             }
-            setEditing(null);
           }}
         />
       )}
@@ -474,14 +510,21 @@ function ItemsTab() {
           saving={create.isPending || update.isPending}
           onClose={() => setEditing(null)}
           onSave={async (body, isNew) => {
-            if (isNew) {
-              await create.mutateAsync(body);
-              toast.success('Article créé');
-            } else {
-              await update.mutateAsync({ id: (editing as ItemPublic).id, body });
-              toast.success('Article mis à jour');
+            try {
+              if (isNew) {
+                await create.mutateAsync(body);
+                toast.success('Article créé');
+              } else {
+                await update.mutateAsync({ id: (editing as ItemPublic).id, body });
+                toast.success('Article mis à jour');
+              }
+              setEditing(null);
+            } catch (err) {
+              toast.error(
+                'Enregistrement impossible',
+                err instanceof ApiError ? err.detail : undefined,
+              );
             }
-            setEditing(null);
           }}
         />
       )}
@@ -533,10 +576,11 @@ function ItemModal({
   saving: boolean;
 }) {
   const [name, setName] = useState(item?.name ?? '');
-  const [catalogId, setCatalogId] = useState(item?.catalog.id ?? catalogs[0]?.id ?? 0);
+  const [catalogId, setCatalogId] = useState<number | null>(item?.catalog.id ?? null);
   const [condition, setCondition] = useState<Condition>(item?.condition ?? 'good');
   const [availability, setAvailability] = useState<Availability>(item?.availability ?? 'available');
   const [deposit, setDeposit] = useState(((item?.deposit_cents ?? 0) / 100).toFixed(2));
+  const selectedCatalogId = catalogId ?? catalogs[0]?.id ?? 0;
 
   return (
     <Modal
@@ -550,12 +594,12 @@ function ItemModal({
           </Button>
           <Button
             loading={saving}
-            disabled={!name.trim() || !catalogId}
+            disabled={!name.trim() || !selectedCatalogId}
             onClick={() =>
               onSave(
                 {
                   name: name.trim(),
-                  catalog_id: catalogId,
+                  catalog_id: selectedCatalogId,
                   condition,
                   availability,
                   deposit_cents: Math.round(parseFloat(deposit || '0') * 100),
@@ -573,8 +617,12 @@ function ItemModal({
         <Field label="Nom" required hint="Identifiant de l'article, ex. « Canon R5 #2 »">
           <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
         </Field>
-        <Field label="Référence" required>
-          <Select value={catalogId} onChange={(e) => setCatalogId(Number(e.target.value))}>
+        <Field
+          label="Référence"
+          required
+          error={catalogs.length === 0 ? "Aucune référence n'existe encore." : undefined}
+        >
+          <Select value={selectedCatalogId} onChange={(e) => setCatalogId(Number(e.target.value))}>
             {catalogs.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
